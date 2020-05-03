@@ -8,42 +8,49 @@ class OrdersComponent extends Component {
         this.drawText("Orders", 0.5, 0.07);
         this.OrdersText = this.drawText("Unprocessed Orders: 0", 0.5, 0.12);
         this.OrdersCount = 0;
+        this.entities = [new Entity(1, 0, 0, 1000), new Entity(2, 0, 0, 2000), new Entity(4, 0, 0, 3000), new Entity(8, 0, 0, 4000)]
+        this.marketEntity = new Entity(1, 1, 0, 1000);
 
-        this.manualEffect = -1;
-        this.timerEffect = 1;
-        this.drawButton("Process An Order", 0.5, 0.17).on('pointerdown', () => this.OrdersCount += this.manualEffect);
-
-        this.sinceLastUpdate = 0;
+        this.manualEffect = 1;
+        this.manualEffects = 0;
+        this.drawButton("Process An Order", 0.5, 0.23).on('pointerdown', () => this.manualEffects += this.manualEffect);
     }
 
     preTick(delta, curStats) {
-        var statChanges = {
-            InventoryCount: 0,
-            OrdersCount: 0,
-            PackagesCount: 0,
-            ShippingCount: 0,
-            Money: 0
-        }
-        // Either zero or a negative change, as the only effect should be processing orders
-        statChanges.OrdersCount = this.OrdersCount - curStats.OrdersCount;
-        // We want to invert this number, and add it to our unpackaged orders count
-        statChanges.PackagesCount = statChanges.OrdersCount * -1;
-        if (this.sinceLastUpdate >= 1000) {
-            this.sinceLastUpdate = 0;
-            if (curStats.InventoryCount > 0) {
-                statChanges.InventoryCount -= this.timerEffect;
-                statChanges.OrdersCount += this.timerEffect;
-                this.OrdersCount += this.timerEffect;
-            }
+        // Handle market transactions, i.e. Unpurchased Inventory => Unprocessed Orders
+        if (this.marketEntity.time >= this.marketEntity.frequency) {
+            this.marketEntity.time = 0;
+            var marketShift = Math.min(this.marketEntity.count * this.marketEntity.rate, curStats.InventoryCount);
+            curStats.InventoryCount -= marketShift;
+            curStats.OrdersCount += marketShift;
         } else {
-            this.sinceLastUpdate += delta;
+            this.marketEntity.time += delta;
         }
-        this.OrdersText.setText("Unprocessed Orders: " + this.OrdersCount);
-        return statChanges;
+
+        // Consider total manual and automatic effects
+        this.potentialDelta = this.manualEffects;
+        this.manualEffects = 0;
+        this.entities.forEach(entity => {
+            if (entity.time >= entity.frequency) {
+                entity.time = 0;
+                this.potentialDelta += entity.rate * entity.count;
+            } else {
+                entity.time += delta
+            }
+        });
+
+        // Take max of limiting variable and possible change as actual change
+        // potentialDelta is actually positive here, because we need to compare to possible orders
+        var actualDelta = Math.min(this.potentialDelta, curStats.OrdersCount);
+        curStats.OrdersCount   -= actualDelta;
+        curStats.PackagesCount += actualDelta;
+
+        return curStats;
     }
 
-    postTick(delta, curStats) {
+    postTick(curStats) {
         this.OrdersCount = curStats.OrdersCount;
+        this.OrdersText.setText("Unprocessed Orders: " + Math.round(this.OrdersCount));
     }
 
     recover(delta) {

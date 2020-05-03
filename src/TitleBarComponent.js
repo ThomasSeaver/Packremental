@@ -14,7 +14,7 @@ class TitleBarComponent extends Component {
 
     update(delta, curStats) {
         this.sinceLastUpdate += delta;
-        if (this.sinceLastUpdate >= 5000) {
+        if (this.sinceLastUpdate >= 4000) {
             this.sinceLastUpdate = 0;
             this.incrementDate(1);
         }
@@ -22,7 +22,7 @@ class TitleBarComponent extends Component {
     }
 
     recover(delta) {
-        this.incrementDate(delta / 5000);
+        this.incrementDate(Math.round(delta / 4000));
     }
 
     incrementDate(days) {

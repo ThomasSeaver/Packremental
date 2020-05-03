@@ -64,20 +64,16 @@ function create () {
 
 function update(time, delta) {
     // Pre-tick - take in updated values from inner workings of modules
-    var InventoryUpdate = InventoryView.preTick(delta, this.curStats);
-    this.curStats = mergeJsons(this.curStats, InventoryUpdate);
-    var OrdersUpdate    = OrdersView.preTick(delta, this.curStats);
-    this.curStats = mergeJsons(this.curStats, OrdersUpdate);
-    var PackagesUpdate  = PackagingView.preTick(delta, this.curStats);
-    this.curStats = mergeJsons(this.curStats, PackagesUpdate);
-    var ShippingUpdate  = ShippingView.preTick(delta, this.curStats);
-    this.curStats = mergeJsons(this.curStats, ShippingUpdate);
+    this.curStats = InventoryView.preTick(delta, this.curStats);
+    this.curStats = OrdersView.preTick(delta, this.curStats);
+    this.curStats = PackagingView.preTick(delta, this.curStats);
+    this.curStats = ShippingView.preTick(delta, this.curStats);
 
     // Post-tick - take in state from main after other modules may have affected eachother's data
-    InventoryView.postTick(delta, this.curStats);
-    OrdersView.postTick(delta, this.curStats);
-    PackagingView.postTick(delta, this.curStats);
-    ShippingView.postTick(delta, this.curStats);
+    InventoryView.postTick(this.curStats);
+    OrdersView.postTick(this.curStats);
+    PackagingView.postTick(this.curStats);
+    ShippingView.postTick(this.curStats);
     // Single Way Updates
     TitleBar.update(delta, this.curStats);
 }
@@ -88,14 +84,4 @@ function recover(delta) {
     OrdersView.recover(delta);
     PackagingView.recover(delta);
     ShippingView.recover(delta);
-}
-
-function mergeJsons(jsonA, jsonB) {
-    return {
-        InventoryCount: jsonA.InventoryCount + jsonB.InventoryCount,
-        OrdersCount:    jsonA.OrdersCount    + jsonB.OrdersCount,
-        PackagesCount:  jsonA.PackagesCount  + jsonB.PackagesCount,
-        ShippingCount:  jsonA.ShippingCount  + jsonB.ShippingCount,
-        Money:          jsonA.Money          + jsonB.Money
-    }
 }

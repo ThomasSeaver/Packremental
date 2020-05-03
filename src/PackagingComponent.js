@@ -8,34 +8,36 @@ class PackagingComponent extends Component {
         this.drawText("Packages", 0.5, 0.07);
         this.PackagesText = this.drawText("Unpackaged Orders: 0", 0.5, 0.12);
         this.PackagesCount = 0;
+        this.entities = [new Entity(1, 0, 0, 1000), new Entity(2, 0, 0, 2000), new Entity(4, 0, 0, 3000), new Entity(8, 0, 0, 4000)]
         
+        this.manualEffect = 1;
         this.manualEffects = 0;
-        this.manualEffect = -1;
-        this.drawButton("Prepare an Order \nfor Shipment", 0.5, 0.17).on('pointerdown', () => this.manualEffects += this.manualEffect);
+        this.drawButton("Prepare an Order\n  for Shipment", 0.5, 0.23).on('pointerdown', () => this.manualEffects += this.manualEffect);
 
     }
 
     preTick(delta, curStats) {
-        var statChanges = {
-            InventoryCount: 0,
-            OrdersCount: 0,
-            PackagesCount: 0,
-            ShippingCount: 0,
-            Money: 0
-        }
-
-        this.PackagesCount = curStats.PackagesCount + this.manualEffects;
-        statChanges.PackagesCount = this.PackagesCount - curStats.PackagesCount;
-        statChanges.ShippingCount = statChanges.PackagesCount * -1;
-
+        this.potentialDelta = this.manualEffects;
         this.manualEffects = 0;
+        this.entities.forEach(entity => {
+            if (entity.time >= entity.frequency) {
+                entity.time = 0;
+                this.potentialDelta += entity.rate * entity.count;
+            } else {
+                entity.time += delta
+            }
+        });
 
-        return statChanges;
+        var actualDelta = Math.min(this.potentialDelta, curStats.PackagesCount);
+        curStats.PackagesCount -= actualDelta;
+        curStats.ShippingCount += actualDelta;
+
+        return curStats;
     }
 
-    postTick(delta, curStats) {
+    postTick(curStats) {
         this.PackagesCount = curStats.PackagesCount;
-        this.PackagesText.setText("Unpackaged Orders: " + this.PackagesCount);
+        this.PackagesText.setText("Unpackaged Orders: " + Math.round(this.PackagesCount));
     }
 
     recover(delta) {

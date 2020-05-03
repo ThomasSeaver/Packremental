@@ -7,34 +7,44 @@ class ShippingComponent extends Component {
     create() {
         this.drawText("Shipping", 0.5, 0.07);
         this.ShippingText = this.drawText("Unshipped Packages: 0", 0.5, 0.12);
+        this.drawText("Profit per Shipped Item: $5.00", 0.5, 0.17);
         this.ShippingCount = 0;
+        this.entities = [new Entity(1, 0, 0, 1000), new Entity(2, 0, 0, 2000), new Entity(4, 0, 0, 3000), new Entity(8, 0, 0, 4000)]
+        this.ShippedValue = 5.00;
 
+        this.manualEffect = 1;
         this.manualEffects = 0;
-        this.manualEffect = -1;
-        this.shippedValue = 5.00;
-        this.drawButton("Ship a Package", 0.5, 0.17).on('pointerdown', () => this.manualEffects += this.manualEffect);
+        this.timerEffect = 0;
+        this.drawButton("Ship a Package", 0.5, 0.23).on('pointerdown', () => this.manualEffects += this.manualEffect);
     }
 
     preTick(delta, curStats) {
-        var statChanges = {
-            InventoryCount: 0,
-            OrdersCount: 0,
-            PackagesCount: 0,
-            ShippingCount: 0,
-            Money: 0
-        }
-
-        this.ShippingCount = curStats.ShippingCount + this.manualEffects;
-        statChanges.ShippingCount = this.ShippingCount - curStats.ShippingCount;
-        statChanges.Money = curStats.Money - Math.round(curStats.Money + this.manualEffects * this.shippedValue);
-
+        this.potentialDelta = this.manualEffects;
         this.manualEffects = 0;
-        return statChanges;
+        this.entities.forEach(entity => {
+            if (entity.time >= entity.frequency) {
+                entity.time = 0;
+                this.potentialDelta += entity.rate * entity.count;
+            } else {
+                entity.time += delta
+            }
+        });
+
+        var actualDelta = Math.min(this.potentialDelta, curStats.ShippingCount);
+
+        curStats.ShippingCount -= actualDelta;
+        curStats.Money += actualDelta * this.ShippedValue;
+
+        return curStats;
     }
 
-    postTick(delta, curStats) {
+    postTick(curStats) {
         this.ShippingCount = curStats.ShippingCount;
-        this.ShippingText.setText("Unshipped Packages: " + this.ShippingCount);
+        this.ShippingText.setText("Unshipped Packages: " + Math.round(this.ShippingCount));
+    }
+
+    recover (delta) {
+
     }
 
 }
