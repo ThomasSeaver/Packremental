@@ -14,6 +14,12 @@ class Component {
         return this.context.add.text(xPos, yPos, text).setOrigin(0.5, 0.5);
     }
 
+    drawText(text, xPercent, yPercent, xOrigin, yOrigin) {
+        var xPos = Math.round(this.xStart + (xPercent * (this.xEnd - this.xStart)));
+        var yPos = Math.round(this.yStart + (yPercent * (this.yEnd - this.yStart)));
+        return this.context.add.text(xPos, yPos, text).setOrigin(xOrigin, yOrigin);
+    }
+
     drawButtonText(text, xPercent, yPercent, style) {
         var xPos = Math.round(this.xStart + (xPercent * (this.xEnd - this.xStart)));
         var yPos = Math.round(this.yStart + (yPercent * (this.yEnd - this.yStart)));

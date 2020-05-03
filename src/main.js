@@ -52,13 +52,15 @@ function create () {
     graphics.strokeLineShape(new Phaser.Geom.Line(Math.round(config.width * 0.25), Math.round(config.height * 0.1), Math.round(config.width * 0.25), config.height));
     graphics.strokeLineShape(new Phaser.Geom.Line(Math.round(config.width * 0.5), Math.round(config.height * 0.1), Math.round(config.width * 0.5), config.height));
     graphics.strokeLineShape(new Phaser.Geom.Line(Math.round(config.width * 0.75), Math.round(config.height * 0.1), Math.round(config.width * 0.75), config.height));
+    graphics.strokeLineShape(new Phaser.Geom.Line(0, Math.round(config.height * 0.4), config.width, Math.round(config.height * 0.4)));
+    graphics.strokeLineShape(new Phaser.Geom.Line(0, Math.round(config.height * 0.785), config.width, Math.round(config.height * 0.785)));
 
     this.curStats = {
         InventoryCount: 0,
         OrdersCount: 0,
         PackagesCount: 0,
         ShippingCount: 0,
-        Money: 100.00
+        Money: 4.80
     }
 }
 
