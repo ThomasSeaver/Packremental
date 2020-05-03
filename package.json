@@ -1,0 +1,23 @@
+{
+  "name": "packremental",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ThomasSeaver/Packremental.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ThomasSeaver/Packremental/issues"
+  },
+  "homepage": "https://github.com/ThomasSeaver/Packremental#readme",
+  "dependencies": {
+    "http-server": "^0.12.3",
+    "phaser": "^3.23.0"
+  }
+}
