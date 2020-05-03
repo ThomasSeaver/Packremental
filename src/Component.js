@@ -14,4 +14,10 @@ class Component {
         return this.context.add.text(xPos, yPos, text).setOrigin(0.5, 0.5);
     }
 
+    drawButton(text, xPercent, yPercent, method) {
+        var button = this.drawText(text, xPercent, yPercent);
+        button.setInteractive();
+        return button;
+    }
+
 }

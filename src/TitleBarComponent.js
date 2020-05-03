@@ -12,12 +12,13 @@ class TitleBarComponent extends Component {
         this.sinceLastUpdate = 0;
     }
 
-    update(delta) {
+    update(delta, curStats) {
         this.sinceLastUpdate += delta;
         if (this.sinceLastUpdate >= 5000) {
             this.sinceLastUpdate = 0;
             this.incrementDate(1);
         }
+        this.moneyText.setText("Money: $" + curStats.Money.toFixed(2));
     }
 
     recover(delta) {

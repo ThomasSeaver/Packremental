@@ -35,19 +35,16 @@ this.game.events.on('visible',function(){
 
 
 function create () {
-    TitleBar = new TitleBarComponent(0, 1, 0, 0.1, config.width, config.height, this);
-    TitleBar.create();
-
+    TitleBar      = new TitleBarComponent(0, 1, 0, 0.1, config.width, config.height, this);
     InventoryView = new InventoryComponent(0, 0.25, 0.1, 1, config.width, config.height, this);
-    InventoryView.create();
-
-    OrdersView = new OrdersComponent(0.25, 0.5, 0.1, 1, config.width, config.height, this);
-    OrdersView.create();
-
+    OrdersView    = new OrdersComponent(0.25, 0.5, 0.1, 1, config.width, config.height, this);
     PackagingView = new PackagingComponent(0.5, 0.75, 0.1, 1, config.width, config.height, this);
-    PackagingView.create();
+    ShippingView  = new ShippingComponent(0.75, 1, 0.1, 1, config.width, config.height, this);
 
-    ShippingView = new ShippingComponent(0.75, 1, 0.1, 1, config.width, config.height, this);
+    TitleBar.create();
+    InventoryView.create();
+    OrdersView.create();
+    PackagingView.create();
     ShippingView.create();
 
     graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xFFFFFF } });
@@ -56,16 +53,49 @@ function create () {
     graphics.strokeLineShape(new Phaser.Geom.Line(Math.round(config.width * 0.5), Math.round(config.height * 0.1), Math.round(config.width * 0.5), config.height));
     graphics.strokeLineShape(new Phaser.Geom.Line(Math.round(config.width * 0.75), Math.round(config.height * 0.1), Math.round(config.width * 0.75), config.height));
 
+    this.curStats = {
+        InventoryCount: 0,
+        OrdersCount: 0,
+        PackagesCount: 0,
+        ShippingCount: 0,
+        Money: 100.00
+    }
 }
 
 function update(time, delta) {
-    TitleBar.update(delta);
+    // Pre-tick - take in updated values from inner workings of modules
+    var InventoryUpdate = InventoryView.preTick(delta, this.curStats);
+    this.curStats = mergeJsons(this.curStats, InventoryUpdate);
+    var OrdersUpdate    = OrdersView.preTick(delta, this.curStats);
+    this.curStats = mergeJsons(this.curStats, OrdersUpdate);
+    var PackagesUpdate  = PackagingView.preTick(delta, this.curStats);
+    this.curStats = mergeJsons(this.curStats, PackagesUpdate);
+    var ShippingUpdate  = ShippingView.preTick(delta, this.curStats);
+    this.curStats = mergeJsons(this.curStats, ShippingUpdate);
+
+    // Post-tick - take in state from main after other modules may have affected eachother's data
+    InventoryView.postTick(delta, this.curStats);
+    OrdersView.postTick(delta, this.curStats);
+    PackagingView.postTick(delta, this.curStats);
+    ShippingView.postTick(delta, this.curStats);
+    // Single Way Updates
+    TitleBar.update(delta, this.curStats);
 }
 
-function recover(deltaTime) {
-    TitleBar.recover(deltaTime);
-    InventoryView.recover(deltaTime);
-    OrdersView.recover(deltaTime);
-    PackagingView.recover(deltaTime);
-    ShippingView.recover(deltaTime);
+function recover(delta) {
+    TitleBar.recover(delta);
+    InventoryView.recover(delta);
+    OrdersView.recover(delta);
+    PackagingView.recover(delta);
+    ShippingView.recover(delta);
+}
+
+function mergeJsons(jsonA, jsonB) {
+    return {
+        InventoryCount: jsonA.InventoryCount + jsonB.InventoryCount,
+        OrdersCount:    jsonA.OrdersCount    + jsonB.OrdersCount,
+        PackagesCount:  jsonA.PackagesCount  + jsonB.PackagesCount,
+        ShippingCount:  jsonA.ShippingCount  + jsonB.ShippingCount,
+        Money:          jsonA.Money          + jsonB.Money
+    }
 }
