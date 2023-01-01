@@ -18,6 +18,6 @@
   "homepage": "https://github.com/ThomasSeaver/Packremental#readme",
   "dependencies": {
     "http-server": "^0.12.3",
-    "phaser": "^3.23.0"
+    "phaser": "^3.55.2"
   }
 }
